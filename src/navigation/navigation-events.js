@@ -1,8 +1,8 @@
-import { reroute } from "./reroute.js";
-import { find } from "../utils/find.js";
-import { formatErrorMessage } from "../applications/app-errors.js";
-import { isInBrowser } from "../utils/runtime-environment.js";
-import { isStarted } from "../start.js";
+import {reroute} from "./reroute.js";
+import {find} from "../utils/find.js";
+import {formatErrorMessage} from "../applications/app-errors.js";
+import {isInBrowser} from "../utils/runtime-environment.js";
+import {isStarted} from "../start.js";
 
 /* We capture navigation event listeners so that we can make sure
  * that application navigation listeners are not called until
@@ -35,7 +35,7 @@ export function navigateToUrl(obj) {
       formatErrorMessage(
         14,
         __DEV__ &&
-          `singleSpaNavigate/navigateToUrl must be either called with a string url, with an <a> tag as its context, or with an event whose currentTarget is an <a> tag`
+        `singleSpaNavigate/navigateToUrl must be either called with a string url, with an <a> tag as its context, or with an event whose currentTarget is an <a> tag`
       )
     );
   }
@@ -47,7 +47,7 @@ export function navigateToUrl(obj) {
     window.location.hash = destination.hash;
   } else if (current.host !== destination.host && destination.host) {
     if (process.env.BABEL_ENV === "test") {
-      return { wouldHaveReloadedThePage: true };
+      return {wouldHaveReloadedThePage: true};
     } else {
       window.location.href = url;
     }
@@ -91,14 +91,24 @@ function urlReroute() {
   reroute([], arguments);
 }
 
+//非微前端路由的判断
+function isNotMFRoute() {
+  if (!window.mfAppRoutes || typeof window.mfAppRoutes !== "object") return true;
+  for (const mfAppRoutesKey in window.mfAppRoutes) {
+    if (location.pathname.indexOf(window.mfAppRoutes[mfAppRoutesKey]) !== -1) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function patchedUpdateState(updateState, methodName) {
   return function () {
     const urlBefore = window.location.href;
     const result = updateState.apply(this, arguments);
     const urlAfter = window.location.href;
-
     if (!urlRerouteOnly || urlBefore !== urlAfter) {
-      if (isStarted()) {
+      if (isStarted() && !isNotMFRoute()) { //非微前端路由，禁止执行避免重复跳转路由
         // fire an artificial popstate event once single-spa is started,
         // so that single-spa applications know about routing that
         // occurs in a different application
@@ -124,7 +134,7 @@ function createPopStateEvent(state, originalMethodName) {
   // singleSpaTrigger=<pushState|replaceState> on the event instance.
   let evt;
   try {
-    evt = new PopStateEvent("popstate", { state });
+    evt = new PopStateEvent("popstate", {state});
   } catch (err) {
     // IE 11 compatibility https://github.com/single-spa/single-spa/issues/299
     // https://docs.microsoft.com/en-us/openspecs/ie_standards/ms-html5e/bd560f47-b349-4d2c-baa8-f1560fb489dd
@@ -163,7 +173,7 @@ if (isInBrowser) {
       if (routingEventsListeningTo.indexOf(eventName) >= 0) {
         capturedEventListeners[eventName] = capturedEventListeners[
           eventName
-        ].filter((fn) => fn !== listenerFn);
+          ].filter((fn) => fn !== listenerFn);
         return;
       }
     }
@@ -185,7 +195,7 @@ if (isInBrowser) {
       formatErrorMessage(
         41,
         __DEV__ &&
-          "single-spa has been loaded twice on the page. This can result in unexpected behavior."
+        "single-spa has been loaded twice on the page. This can result in unexpected behavior."
       )
     );
   } else {

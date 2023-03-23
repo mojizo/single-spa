@@ -34,23 +34,8 @@ export function triggerAppChange() {
   return reroute();
 }
 
-//非微前端路由的判断
-function isNotMFRoute() {
-  if (!window.mfAppRoutes || typeof window.mfAppRoutes !== "object") return true;
-  for (const mfAppRoutesKey in window.mfAppRoutes) {
-    if (location.pathname.indexOf(window.mfAppRoutes[mfAppRoutesKey]) !== -1) {
-      return false;
-    }
-  }
-  return true;
-}
 
 export function reroute(pendingPromises = [], eventArguments) {
-
-  //非微前端路由，禁止执行reroute避免重复跳转路由
-  if (isStarted() && isNotMFRoute()) {
-    return;
-  }
 
   if (appChangeUnderway) {
     return new Promise((resolve, reject) => {
